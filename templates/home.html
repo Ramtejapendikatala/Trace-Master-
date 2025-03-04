@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TraceXpert: Real-Time Facial Recognition and Case Management for Missing Person Recovery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <a href="javascript:void(0);" onclick="showHome()">Home</a>
+            <a href="javascript:void(0);" onclick="toggleSection('contact-section')">Contact</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <div class="left-content">
+            <h1>
+                <span class="brand-title">TraceXpert</span> <br>
+                <div class="spacing-div"></div> 
+                <span class="main-title">Real-Time Facial Recognition and Case Management for Missing Person Recovery</span>
+            </h1>
+            <p>This project addresses the alarming rise in missing persons cases, a global concern. Families suffer immense distress, and traditional search methods often fall short due to time constraints and lack of technological support. Recognizing the need for a more efficient and technology-driven solution, we developed this platform to assist in identifying and reuniting missing persons with their families.</p>
+            
+            <button onclick="startTransition()">Get Started</button>
+        </div>
+        <div class="right-content">
+            <img src="{{ url_for('static', filename='images/fpic_copy.avif') }}" alt="Missing Child Awareness">
+        </div>
+    </div>
+
+    <!-- Hidden Contact Section -->
+    <div id="contact-section" class="hidden-section">
+            <h2>Contact Us</h2>
+            <p>support@gmail.com</p>
+    </div>
+
+    <script>
+        function startTransition() {
+            document.body.classList.add("slide-out");
+            setTimeout(() => {
+                window.location.href = "/login"; // Redirect after animation
+            }, 1000); // Wait for animation
+        }
+
+        function toggleSection(sectionId) {
+            // Hide the main content
+            document.getElementById('main-content').style.display = 'none';
+
+            // Hide all sections first
+            document.getElementById('contact-section').style.display = 'none';
+
+            // Show the clicked section
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        function showHome() {
+            // Hide all sections
+            document.getElementById('contact-section').style.display = 'none';
+
+            // Show the main content
+            document.getElementById('main-content').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

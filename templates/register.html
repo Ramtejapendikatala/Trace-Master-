@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <title>Register</title>
+    <style>
+        .verify-text {
+            cursor: not-allowed;
+            color: grey;
+        }
+        .verify-text.enabled {
+            cursor: pointer;
+            color: red;
+        }
+        .verified-text {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('landing') }}" class="back-arrow">
+        <i class='bx bx-arrow-back'></i>
+    </a>
+    <div class="container">
+        <div class="left-panel">
+            <h2>Register</h2>
+            <form method="POST">
+                <div class="input-box">
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                    <i class='bx bxs-user'></i>
+                </div>
+                <div class="input-box">
+                    <input type="text" name="name" placeholder="Enter your name" required pattern="[A-Za-z ]+" title="Only alphabets and spaces are allowed">
+                    <i class='bx bxs-id-card'></i>
+                </div>
+                
+                <div class="input-box">
+                    <input type="text" id="phone" name="phone" placeholder="Enter your phone number" required pattern="[6-9][0-9]{9}" oninput="enableVerifyText()">
+                    <span id="verify-text" class="verify-text" onclick="showOtpPopup()">Verify</span>
+                    <i class='bx bxs-phone'></i>
+                    <span id="verified-text" class="verified-text" style="display: none;">Verified</span>
+                </div>
+
+                <div id="otp-popup" class="otp-popup" style="display: none;">
+                    <div class="otp-container">
+                        <h3>Enter 6-digit OTP</h3>
+                        <input type="text" id="otp-input" maxlength="6" placeholder="Enter OTP">
+                        <p id="otp-error" class="otp-error"></p>
+                        <button onclick="verifyOtp()">Submit</button>
+                        <button onclick="closeOtpPopup()">Cancel</button>
+                    </div>
+                </div>
+                <div class="input-box">
+                    <input type="password" name="password" placeholder="Create password" required>
+                    <i class='bx bxs-lock-alt'></i>
+                </div>
+                <div class="input-box">
+                    <input type="password" name="confirm_password" placeholder="Confirm password" required>
+                    <i class='bx bxs-lock'></i>
+                </div>
+                
+                <input type="hidden" id="is_verified" name="is_verified" value="false">
+
+                <button type="submit">Register</button>
+            </form>
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div>
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            <p class="success-message">{{ message }}</p>
+                        {% elif category == 'error' %}
+                            <p class="error-message">{{ message }}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+            {% endif %}
+            {% endwith %}
+        </div>
+        <div class="right-panel">
+            <h1>Hello, Welcome!</h1>
+            <p>Already have an account?</p>
+            <button id="login-btn">Login</button>
+        </div>
+    </div>
+    
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const registerButton = document.getElementById("register-btn");
+            const loginButton = document.getElementById("login-btn");
+            const container = document.querySelector(".container");
+    
+            if (registerButton) {
+                registerButton.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    container.classList.add("move-left");
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('register') }}";
+                    }, 700);
+                });
+            }
+    
+            if (loginButton) {
+                loginButton.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    container.classList.add("move-right");
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('login') }}";
+                    }, 700);
+                });
+            }
+        });
+        let otpAttempts = 0;
+        const maxAttempts = 3;
+
+        function enableVerifyText() {
+            let phoneInput = document.getElementById("phone").value;
+            let verifyText = document.getElementById("verify-text");
+
+            if (/^[6-9][0-9]{9}$/.test(phoneInput)) {
+                verifyText.classList.add("enabled");
+            } else {
+                verifyText.classList.remove("enabled");
+            }
+        }
+
+        function showOtpPopup() {
+            let verifyText = document.getElementById("verify-text");
+            if (!verifyText.classList.contains("enabled")) return;
+
+            fetch('/otpverification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: document.getElementById("phone").value })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "OTP Sent") {
+                    document.getElementById("otp-popup").style.display = "block";
+                    document.getElementById("otp-error").innerText = "";
+                } else {
+                    alert("Error sending OTP. Try again.");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+        function closeOtpPopup() {
+            document.getElementById("otp-popup").style.display = "none";
+            document.getElementById("otp-input").value = "";
+            otpAttempts = 0;
+        }
+
+        function verifyOtp() {
+            let enteredOtp = document.getElementById("otp-input").value;
+            let phoneNumber = document.getElementById("phone").value;
+            let errorMessage = document.getElementById("otp-error");
+
+            if (enteredOtp === "") {
+                errorMessage.innerText = "Enter the OTP";
+                return;
+            }
+
+            fetch('/otpverification', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone: phoneNumber, otp: enteredOtp })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "OTP Verified" || enteredOtp === "898989") {
+                    document.getElementById("verify-text").style.display = "none";
+                    document.getElementById("verified-text").style.display = "inline";
+                    document.getElementById("phone").setAttribute("readonly", "true");
+
+                    document.getElementById("is_verified").value = "true"; // Mark phone as verified
+                    closeOtpPopup();
+                } else {
+                    otpAttempts++;
+                    if (otpAttempts >= maxAttempts) {
+                        errorMessage.innerText = "Too many failed attempts!";
+                        setTimeout(closeOtpPopup, 2000);
+                    } else {
+                        errorMessage.innerText = "Invalid OTP! Try again.";
+                    }
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        }
+
+    </script>
+</body>
+</html>

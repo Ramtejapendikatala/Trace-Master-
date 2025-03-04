@@ -1,0 +1,892 @@
+<!-- # Title : TraceXpert: Real-Time Facial Recognition and Case Management for Missing Person Recovery
+# FY25-Q1-S1-01/20-Ver:1.0
+# Author : Ramateja(Developer,Tester),Dinesh(Developer,Tester),Rohitha(UI Developer),Bhuvaneswari Devi(Model Training)
+# FY25-Q1-S1-01/20-Version 1.0 – Enhancement: Initial development phase, where login and registration pages were created, and CSV files were integrated for data storage.
+# FY25-Q1-S2-01/22-Version 2.0 – Enhancement: Dashboard page and profile icon navigation bars were added. Data from the registration CSV file was successfully retrieved and displayed.
+# FY25-Q1-S3-01/24-Version 2.0 – Enhancement: Developed the functionality to raise complaints and suspected person reports, with data being sent to and stored in CSV files upon submission.
+# FY25-Q1-S5-01/28-Version 2.0 – Enhancement: Implemented a ticket status feature, allowing users to retrieve and display data from both complaint and suspected person files.
+# FY25-Q1-S9-02/05-Version 2.0 – Enhancement:  Added a modal that appears when submitting complaints or suspected person reports, displaying matching results in a carousel format, along with backend data features.
+# FY25-Q1-S10-02/07-Version 2.0 – Enhancement: Enhanced the ticket details section, enabling the display of complaint and suspected person details retrieved from relevant CSV files.
+# FY25-Q1-S12-02/11-Version 2.0 – Enhancement: Introduced a notification icon to inform users of updates, with the option to clear notifications.
+# FY25-Q1-S13-02/17-Version 3.0 – Enhancement: Added user statistics and graphical representations of case distribution, sourced from the data in the CSV files.
+# FY25-Q1-S17-02/19-Version 4.0 – Enhancement: Admin dashboard displaying overall application usage statistics.
+# FY25-Q1-S19-02/21-Version 4.0 – Enhancement: Visualizes data through graphs for the admin's overview.
+# FY25-Q1-S20-02/24-Version 4.0 – Enhancement: OTP-based user authentication setup for registration.
+# FY25-Q1-S20-02/25-Version 4.0 – Enhancement: Introduced a help page with detailed instructions, acting as a user manual to assist users in navigating the application
+
+ -->
+
+
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Dashboard</title>
+     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ </head>
+ <body>
+     <div class="navbar">
+         <div class="nav-left">
+             <svg xmlns="http://www.w3.org/2000/svg" style="margin-left:15px;" height="24" width="30" viewBox="0 0 640 512">
+                 <path fill="#ffffff" d="M320 0a40 40 0 1 1 0 80 40 40 0 1 1 0-80zm44.7 164.3L375.8 253c1.6 13.2-7.7 25.1-20.8 26.8s-25.1-7.7-26.8-20.8l-4.4-35-7.6 0-4.4 35c-1.6 13.2-13.6 22.5-26.8 20.8s-22.5-13.6-20.8-26.8l11.1-88.8L255.5 181c-10.1 8.6-25.3 7.3-33.8-2.8s-7.3-25.3 2.8-33.8l27.9-23.6C271.3 104.8 295.3 96 320 96s48.7 8.8 67.6 24.7l27.9 23.6c10.1 8.6 11.4 23.7 2.8 33.8s-23.7 11.4-33.8 2.8l-19.8-16.7zM40 64c22.1 0 40 17.9 40 40l0 40 0 80 0 40.2c0 17 6.7 33.3 18.7 45.3l51.1 51.1c8.3 8.3 21.3 9.6 31 3.1c12.9-8.6 14.7-26.9 3.7-37.8l-15.2-15.2-32-32c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l32 32 15.2 15.2c0 0 0 0 0 0l25.3 25.3c21 21 32.8 49.5 32.8 79.2l0 78.9c0 26.5-21.5 48-48 48l-66.7 0c-17 0-33.3-6.7-45.3-18.7L28.1 393.4C10.1 375.4 0 351 0 325.5L0 224l0-64 0-56C0 81.9 17.9 64 40 64zm560 0c22.1 0 40 17.9 40 40l0 56 0 64 0 101.5c0 25.5-10.1 49.9-28.1 67.9L512 493.3c-12 12-28.3 18.7-45.3 18.7L400 512c-26.5 0-48-21.5-48-48l0-78.9c0-29.7 11.8-58.2 32.8-79.2l25.3-25.3c0 0 0 0 0 0l15.2-15.2 32-32c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-32 32-15.2 15.2c-11 11-9.2 29.2 3.7 37.8c9.7 6.5 22.7 5.2 31-3.1l51.1-51.1c12-12 18.7-28.3 18.7-45.3l0-40.2 0-80 0-40c0-22.1 17.9-40 40-40z"/>
+             </svg>
+         </div>
+         <div class="nav-center">
+             <span style="font-weight: bold; margin-left:100px;">TraceXpert: Real-Time Facial Recognition and Case Management for Missing Person Recovery</span>
+         </div>
+         <div class="nav-right">
+             <div class="icon">
+                 <a href="#" onclick="loadContent('home')" style="font-size: 24px; text-decoration: none; color: white;">
+                     <i class="fas fa-home"></i>
+                 </a>
+             </div>
+             <div class="notification-container">
+                 <div class="icon" id="notificationIcon">
+                     <i class="fas fa-bell"></i>
+                     <span class="notification-badge" id="notificationBadge"></span>
+                 </div>
+                 <div class="dropdown notification-scrool" id="notificationDropdown">
+                     <h4>Notifications</h4>
+                     <ul id="notificationList"></ul>
+                     <button id="clearNotifications">Clear All</button>
+                 </div>
+             </div>
+             <div class="icon" id="profileIcon">
+                 <i class="fas fa-user-circle"></i>
+                 <div class="dropdown" id="profileDropdown">
+                     <p><i class="fas fa-envelope"></i> {{ user['Email'] }}</p>
+                     <p><i class="fas fa-user"></i> {{ user['Name'] }}</p>
+                     <p><i class="fas fa-phone"></i> {{ user['Phone'] }}</p>
+                     <button id="logoutButton" onclick="showLogoutPopup()">Logout</button>
+                 </div>
+             </div>
+         </div>
+     </div>
+     <div class="sidebar">
+         <a href="#" onclick="loadContent('home')">Home</a>
+         <a href="#" onclick="loadContent('raise-complaint')">Raise Complaint</a>
+         <a href="#" onclick="loadContent('suspected-child')">Suspected Person</a>
+         <a href="#" onclick="loadContent('Ticket-status')">Ticket-status</a>
+         <a href="#" onclick="loadContent('ticket-search')">Ticket Details</a>
+         <a href="#" onclick="loadContent('statistics')">Statistics</a>
+         <!-- <a href="#" onclick="loadContent('feedback')">Feedback</a> -->
+         <a href="#" onclick="loadContent('help')">Help</a>
+     </div>
+     <div class="main" id="main-content">
+         <!-- Default content loaded by the script -->
+     </div>
+     <div id="logout-popup" class="logout-popup">
+         <p>Are you sure you want to log out?</p>
+         <button class="confirm" onclick="logout()">Yes</button>
+         <button class="cancel" onclick="closeLogoutPopup()">No</button>
+     </div>
+     <script>
+         document.addEventListener("DOMContentLoaded", function () {
+             const notificationIcon = document.getElementById("notificationIcon");
+             const notificationBadge = document.getElementById("notificationBadge");
+             const notificationDropdown = document.getElementById("notificationDropdown");
+             const notificationList = document.getElementById("notificationList");
+             const clearButton = document.getElementById("clearNotifications");
+ 
+             const profileIcon = document.getElementById("profileIcon");
+             const profileDropdown = document.getElementById("profileDropdown");
+ 
+             function fetchNotifications() {
+                 fetch("/get_notifications")
+                     .then(response => response.json())
+                     .then(data => {
+                         notificationList.innerHTML = "";
+                         let unreadCount = 0;
+ 
+                         data.forEach(notification => {
+                             const li = document.createElement("li");
+                             li.textContent = notification.message;
+                             notificationList.appendChild(li);
+                             if (notification.status === "unread") {
+                                 unreadCount++;
+                             }
+                         });
+ 
+                         notificationBadge.textContent = unreadCount > 0 ? unreadCount : "";
+                         notificationBadge.style.display = unreadCount > 0 ? "block" : "none";
+                     });
+             }
+ 
+             notificationIcon.addEventListener("click", function (event) {
+                 event.stopPropagation();
+                 notificationDropdown.style.display = notificationDropdown.style.display === "block" ? "none" : "block";
+                 profileDropdown.style.display = "none";
+                 fetchNotifications();
+             });
+ 
+             profileIcon.addEventListener("click", function (event) {
+                 event.stopPropagation();
+                 profileDropdown.style.display = profileDropdown.style.display === "block" ? "none" : "block";
+                 notificationDropdown.style.display = "none";
+             });
+ 
+             clearButton.addEventListener("click", function () {
+                 fetch("/clear_notifications", { method: "POST" })
+                     .then(() => {
+                         notificationList.innerHTML = "";
+                         notificationBadge.style.display = "none";
+                         notificationDropdown.style.display = "none";
+                     });
+             });
+ 
+             document.addEventListener("click", function (event) {
+                 if (!notificationDropdown.contains(event.target) && !notificationIcon.contains(event.target)) {
+                     notificationDropdown.style.display = "none";
+                 }
+                 if (!profileDropdown.contains(event.target) && !profileIcon.contains(event.target)) {
+                     profileDropdown.style.display = "none";
+                 }
+             });
+ 
+             fetchNotifications();
+         });
+ 
+         function loadContent(option,section=null) {
+             const mainContent = document.getElementById('main-content');
+             const sidebarLinks = document.querySelectorAll('.sidebar a');
+ 
+             sidebarLinks.forEach(link => link.classList.remove('active'));
+             const activeLink = document.querySelector(`.sidebar a[onclick="loadContent('${option}')"]`);
+             if (activeLink) {
+                 activeLink.classList.add('active');
+             }
+ 
+             if (option === 'home') {
+                 mainContent.innerHTML = `
+                     <div class="content-container-home">
+                         <div class="form-container-for-home home-container">
+                             <h1>Home</h1>
+                             <h2>Welcome {{ user.Name }}!</h2>
+                             <div class="slideshow">
+                                 
+                                     <img src="{{ url_for('static', filename='images/image11.jpeg') }}" alt="Community Support">
+                                     <img src="{{ url_for('static', filename='images/image12.jpeg') }}" alt="Recovery Success">
+                                     <img src="{{ url_for('static', filename='images/image13.jpeg') }}" alt="Family Reunion">
+                                     <img src="{{ url_for('static', filename='images/image14.jpeg') }}" alt="Community Support">
+                                     <img src="{{ url_for('static', filename='images/image15.jpeg') }}" alt="Recovery Success">
+                                     <img src="{{ url_for('static', filename='images/image16.jpeg') }}" alt="Family Reunion">
+                                     <img src="{{ url_for('static', filename='images/image17.jpeg') }}" alt="Community Support">
+                                     <img src="{{ url_for('static', filename='images/image18.jpeg') }}" alt="Recovery Success">
+                                 
+                             </div>
+                             <div class="matter">
+                             <ul><p><strong>Purpose of the Project:</strong><br><br>
+                               In India, a significant number of people are reported missing every year, with many cases remaining unresolved.<br>This system leverages AI-based image recognition and database matching to compare reported missing children with found or suspected cases.<br><br>
+                               <strong>Our key objectives include:</strong><br><br>
+ 
+                             <strong>Faster Identification:</strong> Using machine learning and image recognition to detect matches between missing and found children.<br><br>
+                             <strong>Centralized Reporting:</strong> Providing a user-friendly platform where individuals can report missing or suspected cases.<br><br>
+                             <strong>Automated Notifications:</strong> Alerting relevant authorities and individuals when a match is found.<br><br>
+                             <strong>Seamless Case Tracking:</strong> Allowing users to track the status of submitted cases and receive real-time updates.</p></ul>
+                             </div>
+ 
+                             <div class="developers">
+                                 <h3>Developed By</h3>
+                                 <p>Dinesh Kola - Developer and Tester</p>
+                                 <p>Ramateja - Developer and Tester</p>
+                                 <p>Rohitha - UI/UX Designer</p>
+                                 <p>Bhuvaneswari Devi - AI/DL Engineer</p>
+                             </div>
+                         </div>
+                     </div>
+                 `;
+                 
+             }
+             else if (option === 'raise-complaint') {
+                 mainContent.innerHTML = `
+                     <div class="content-container-raise-complaint">
+                         <div class="form-container-raise">
+                             <div class="support-icon">
+                                 <a href="#" onclick="loadContent('help','raise-complaint-help')"><i class="fa-sharp fa-solid fa-circle-question fa-2xl" style="color: #007bff;"></i></a>
+                             </div>
+                             <h1>Raise Complaint</h1>
+                             <form id="complaintForm" enctype="multipart/form-data">
+                                 <p><label for="picture" style="margin-left:15px;" >Upload Picture: </label>Upload a clear image-(Format:- .png,.jpg,.jpeg)</p>
+                                 <div class="form-outline">
+                                     <input type="file" id="picture" name="picture" required accept=".jpg, .jpeg, .png">
+                                     <span id="error-message" style="color: red; display: none;margin-left:250px;"></span>
+                                 </div>
+                                 <div class="form-outline">
+                                    <input type="text" id="name" name="name" placeholder=" " required pattern="[A-Za-z ]+" title="Only alphabets and spaces are allowed">
+ 
+                                     <label for="name">Missing Person Name</label>
+                                 </div>
+                                 <div class="form-outline">
+                                     <input type="text" id="address" name="address" required placeholder=" ">
+                                     <label for="address">Parent Address</label>
+                                 </div>
+                                 <div class="form-outline">
+                                     <input type="text" id="phone" name="phone" required pattern="[6-9][0-9]{9}" placeholder=" " title="Only alphabets and spaces are allowed">
+                                     <label for="phone">Parent Phone Number</label>
+                                 </div>
+                                 <div class="form-outline">
+                                     <input type="text" id="description" name="description" required placeholder=" ">
+                                     <label for="description">Description</label>
+                                 </div>
+                                 <button type="submit">Submit</button>
+                             </form>
+                         </div>
+                     </div>
+                     <div id="myModal" class="modal">
+                         <div class="modal-content">
+                             <p style="text-align: center; font-size: 25px; font-weight: bold;"><strong>Matching</strong></p>       
+                             <div class="container">
+                                 <div class="left-box">
+                                     <img id="left-image" src="" alt="Left Image">
+                                 </div>
+                                 <div id="message-box"></div>
+                                 <div class="right-box">
+                                     <div class="image-scroll">
+                                         <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 1">
+                                         <img src="{{ url_for('static', filename='images/image2.jpg') }}" alt="Image 2">
+                                         <img src="{{ url_for('static', filename='images/image3.jpg') }}" alt="Image 3">
+                                         <img src="{{ url_for('static', filename='images/image4.jpg') }}" alt="Image 4">
+                                         <img src="{{ url_for('static', filename='images/image5.jpg') }}" alt="Image 5">
+                                         <img src="{{ url_for('static', filename='images/image6.jpg') }}" alt="Image 6">
+                                         <img src="{{ url_for('static', filename='images/image7.jpg') }}" alt="Image 7">
+                                         <img src="{{ url_for('static', filename='images/image8.jpg') }}" alt="Image 8">
+                                         <img src="{{ url_for('static', filename='images/image9.jpg') }}" alt="Image 9">
+                                         <img src="{{ url_for('static', filename='images/image10.jpg') }}" alt="Image 10">
+                                     </div>
+                                     <div id="final-image-container" style="display: none;">
+                                         <img id="final-image" src="" alt="Final Image">
+                                     </div>
+                                 </div>
+                             </div>
+                             <div id="result-box"></div>
+                         </div>
+                     </div>
+                 `;
+                 document.getElementById('picture').addEventListener('change', function() {
+                     const file = this.files[0];
+                     const errorMessage = document.getElementById('error-message');
+                     
+                     if (file) {
+                     const validTypes = ['image/jpeg', 'image/png'];
+                     if (!validTypes.includes(file.type)) {
+                         errorMessage.textContent = 'Only JPG, JPEG, and PNG files are allowed.';
+                         errorMessage.style.display = 'block';
+                         this.value = ''; // Reset file input
+                     } else {
+                         errorMessage.textContent = '';
+                         errorMessage.style.display = 'none';
+                     }
+                     }
+                 });
+                 document.getElementById("picture").addEventListener("change", function(event) {
+                     const file = event.target.files[0];
+                     if (file) {
+                         const reader = new FileReader();
+                         reader.onload = function(e) {
+                             document.getElementById("left-image").src = e.target.result;
+                             document.getElementById("left-image").style.display = "block";
+                         };
+                         reader.readAsDataURL(file);
+                     }
+                 });
+                 document.getElementById("complaintForm").onsubmit = async function (event) {
+                     event.preventDefault();
+                     document.getElementById('myModal').style.display = 'block';
+                     let phone = document.getElementById("phone").value;
+                     if (!/^[6-9]\d{9}$/.test(phone)) {
+                         alert("Please enter a valid 10-digit phone number starting with 6, 7, 8, or 9.");
+                         return;
+                     }
+                     let formData = new FormData(this);
+                     console.log("Submitting Data:", Object.fromEntries(formData.entries()));
+                     try {
+                         let response = await fetch("/submit_complaint", {
+                             method: "POST",
+                             body: formData
+                         });
+                         if (!response.ok) throw new Error("Failed to submit complaint");
+                         let data = await response.json();
+                         console.log("Server Response:", data);
+                         const finalImageContainer = document.getElementById('final-image-container');
+                         const imageScroll = document.querySelector('.image-scroll');
+                         const messageBox = document.getElementById('message-box');
+                         const resultBox = document.getElementById('result-box');
+                         const finalImage = document.getElementById('final-image');
+                         imageScroll.style.display = 'none';
+                         if (data.status === "MATCH FOUND") {
+                             finalImage.src = `static/found_data/${data.matched_image}`;
+                             finalImageContainer.style.display = 'flex';
+                             messageBox.textContent = "Match Found";
+                             messageBox.classList.add('match-found');
+                             resultBox.innerHTML = `
+                                 <p style="margin-top: 60px; font-size:18px; text-align: center;"><strong>Founder Details</strong></p>
+                                 <ul><strong>Name :</strong> ${data.details.name}</ul>
+                                 <ul><strong>Address :</strong> ${data.details.address}</ul>
+                                 <ul><strong>Phone :</strong> ${data.details.phone}</ul>
+                                 <ul><strong>Ticket ID :</strong> ${data.details.ticket_id}</ul>
+                             `;
+                         }
+                         else if (data.status === "INVALID"){
+                            finalImage.src = "static/images/default.jpeg";
+                            finalImageContainer.style.display = 'flex';
+                            messageBox.textContent = "Re-Upload Image";
+                            messageBox.classList.add('not-found');
+                            resultBox.innerHTML = `
+                                 <p style=" margin-left:75px; margin-top:80px;"><strong>Re-upload a proper image (Reference:Click on help) </strong></p>
+                            `;
+
+                         } else {
+                             finalImage.src = "static/images/default.jpeg";
+                             finalImageContainer.style.display = 'flex';
+                             messageBox.textContent = "No Match Found";
+                             messageBox.classList.add('not-found');
+                             resultBox.innerHTML = `
+                                 <p style=" margin-left:75px; margin-top:80px;">Complaint submitted successfully! Complaint ID :<strong> ${data.ticket_id}</strong></p>
+                             `;
+                         }
+                         this.reset();
+                     } catch (error) {
+                         console.error("Error processing complaint:", error);
+                     }
+                 };
+             } 
+             else if (option === 'suspected-child') {
+                 mainContent.innerHTML = `
+                     <div class="content-container-suspected-child">
+                         <div class="form-container-suspect">
+                             <div class="support-icon">
+                                 <a href="#" onclick="loadContent('help','suspected-missing-help')"><i class="fa-sharp fa-solid fa-circle-question fa-2xl" style="color: #007bff;"></i></a>
+                             </div>
+                             <h1>Suspected Missing Person</h1>
+                             <form id="FoundForm" enctype="multipart/form-data">
+                                 <p><label for="picture" style="margin-left:15px;" >Upload Picture: </label>Upload a clear image-(Format:- .png,.jpg,.jpeg)</p>
+                                 <div class="form-outline">
+                                 
+                                 <input type="file" id="picture" name="picture" required accept=".jpg, .jpeg, .png">
+                                     <span id="error-message" style="color: red; display: none;margin-left:250px;"></span>
+                             </div>
+                             <div class="form-outline">
+                                 <input type="text" id="name" name="name" placeholder=" " required pattern="[A-Za-z ]+" title="Only alphabets and spaces are allowed">
+                                 <label for="name">Your Name</label>
+ 
+                             </div>
+                             <div class="form-outline">
+                                 <input type="text" id="location" name="location" placeholder=" " required>
+                                 <label for="location">Location Found At</label>
+                             </div>
+                             <div class="form-outline">
+                                 <input type="text" id="name" name="nameofchild" placeholder=" "  pattern="[A-Za-z ]+" title="Only alphabets and spaces are allowed">
+                                 <label for="nameofchild">Missing Person Name (Optional)</label>
+                             </div>
+                             <div class="form-outline">
+                                 <input type="text" id="phone" name="phone" placeholder=" " required pattern="[6-9][0-9]{9}" title="Please enter exactly 10 digits">
+                                 <label for="phone">Phone Number</label>
+                             </div>
+                             <button type="submit">Submit</button>
+                             </form>
+                         </div>
+                     </div>
+                     <div id="myModal" class="modal">
+                         <div class="modal-content">
+                             <p style="text-align: center; font-size: 25px; font-weight: bold;"><strong>Matching</strong></p>       
+                             <div class="container">
+                                 <div class="left-box">
+                                     <img id="left-image" src="" alt="Left Image">
+                                 </div>
+                                 <div id="message-box"></div>
+                                 <div class="right-box">
+                                     <div class="image-scroll">
+                                         <img src="{{ url_for('static', filename='images/image1.jpg') }}" alt="Image 1">
+                                         <img src="{{ url_for('static', filename='images/image2.jpg') }}" alt="Image 2">
+                                         <img src="{{ url_for('static', filename='images/image3.jpg') }}" alt="Image 3">
+                                         <img src="{{ url_for('static', filename='images/image4.jpg') }}" alt="Image 4">
+                                         <img src="{{ url_for('static', filename='images/image5.jpg') }}" alt="Image 5">
+                                         <img src="{{ url_for('static', filename='images/image6.jpg') }}" alt="Image 6">
+                                         <img src="{{ url_for('static', filename='images/image7.jpg') }}" alt="Image 7">
+                                         <img src="{{ url_for('static', filename='images/image8.jpg') }}" alt="Image 8">
+                                         <img src="{{ url_for('static', filename='images/image9.jpg') }}" alt="Image 9">
+                                         <img src="{{ url_for('static', filename='images/image10.jpg') }}" alt="Image 10">
+                                     </div>
+                                     <div id="final-image-container" style="display: none;">
+                                         <img id="final-image" src="" alt="Final Image">
+                                     </div>
+                                 </div>
+                             </div>
+                             <div id="result-box"></div>
+                         </div>
+                     </div>
+                 `;
+                 document.getElementById('picture').addEventListener('change', function() {
+                     const file = this.files[0];
+                     const errorMessage = document.getElementById('error-message');
+                     
+                     if (file) {
+                     const validTypes = ['image/jpeg', 'image/png'];
+                     if (!validTypes.includes(file.type)) {
+                         errorMessage.textContent = 'Only JPG, JPEG, and PNG files are allowed.';
+                         errorMessage.style.display = 'block';
+                         this.value = ''; // Reset file input
+                     } else {
+                         errorMessage.textContent = '';
+                         errorMessage.style.display = 'none';
+                     }
+                     }
+                 });
+                 document.getElementById("picture").addEventListener("change", function(event) {
+                     const file = event.target.files[0];
+                     if (file) {
+                         const reader = new FileReader();
+                         reader.onload = function(e) {
+                             document.getElementById("left-image").src = e.target.result;
+                             document.getElementById("left-image").style.display = "block";
+                         };
+                         reader.readAsDataURL(file);
+                     }
+                 });
+                 document.getElementById("FoundForm").onsubmit = async function (event) {
+                     event.preventDefault();
+                     document.getElementById('myModal').style.display = 'block';
+                     let phone = document.getElementById("phone").value;
+                     if (!/^[6-9]\d{9}$/.test(phone)) {
+                         alert("Please enter a valid 10-digit phone number starting with 6, 7, 8, or 9.");
+                         return;
+                     }
+                     let formData = new FormData(this);
+                     console.log("Submitting Data:", Object.fromEntries(formData.entries()));
+                     try {
+                         let response = await fetch("/submit_suspected", {
+                             method: "POST",
+                             body: formData
+                         });
+                         if (!response.ok) throw new Error("Failed to submit suspected");
+                         let data = await response.json();
+                         console.log("Server Response:", data);
+                         const finalImageContainer = document.getElementById('final-image-container');
+                         const imageScroll = document.querySelector('.image-scroll');
+                         const messageBox = document.getElementById('message-box');
+                         const resultBox = document.getElementById('result-box');
+                         const finalImage = document.getElementById('final-image');
+                         imageScroll.style.display = 'none';
+                         if (data.status === "MATCH FOUND") {
+                             finalImage.src = `static/found_data/${data.matched_image}`;
+                             finalImageContainer.style.display = 'flex';
+                             messageBox.textContent = "Match Found";
+                             messageBox.classList.add('match-found');
+                             resultBox.innerHTML = `
+                                 <p style="margin-top: 60px; font-size:18px; text-align: center;"><strong>Parent Details</strong></p>
+                                 <ul><strong>Name :</strong> ${data.details.name}</ul>
+                                 <ul><strong>Address :</strong> ${data.details.address}</ul>
+                                 <ul><strong>Phone :</strong> ${data.details.phone}</ul>
+                                 <ul><strong>Ticket ID :</strong> ${data.details.ticket_id}</ul>
+                             `;
+                         }
+                         else if (data.status === "INVALID"){
+                            finalImage.src = "static/images/default.jpeg";
+                            finalImageContainer.style.display = 'flex';
+                            messageBox.textContent = "Re-Upload Image";
+                            messageBox.classList.add('not-found');
+                            resultBox.innerHTML = `
+                                 <p style=" margin-left:75px; margin-top:80px;"><strong>Re-upload a proper image (Reference:Click on help) </strong></p>
+                            `;
+
+                         } else {
+                             finalImage.src = "static/images/default.jpeg";
+                             finalImageContainer.style.display = 'flex';
+                             messageBox.textContent = "No Match Found";
+                             messageBox.classList.add('not-found');
+                             resultBox.innerHTML = `
+                                 <p style=" margin-left:75px; margin-top:80px;">Suspected Details submitted successfully! Suspected ID :<strong> ${data.ticket_id}</strong></p>
+                             `;
+                         }
+                         this.reset();
+                     } catch (error) {
+                         console.error("Error processing suspected:", error);
+                     }
+                 };
+             } 
+             else if (option === 'Ticket-status') {
+                 fetch('/get_tickets')
+                     .then(response => response.json())
+                     .then(data => {
+                         let ticketsHTML = `
+                             <div class="support-icon">
+                                 <a href="#" onclick="loadContent('help','ticket-status-help')"><i class="fa-sharp fa-solid fa-circle-question fa-2xl" style="color: #007bff;"></i></a>
+                             </div>
+                             <h1>Ticket Status</h1>
+                             <div class="form-container-for-get-ticket">
+                                 <table>
+                                     <thead>
+                                         <tr>
+                                             <th>Ticket ID</th>
+                                             <th>
+                                                 <div class = "status-filter">
+                                                 <label for="ticket-status-filter">Status</label>
+                                                 <select id="ticket-status-filter">
+                                                     <option value="both">Both</option>
+                                                     <option value="In Progress">In Progress</option>
+                                                     <option value="Completed">Completed</option>
+                                                 </select>
+                                                 </div>
+                                             </th>
+                                         </tr>
+                                     </thead>
+                                     <tbody id="ticket-table-body">
+                                         <!-- Empty at first, will be filled dynamically -->
+                                     </tbody>
+                                 </table>
+                                 <button id="get-ticket-status">Get Ticket Status</button>
+                             </div>
+                             <div id="ticket-table-container"></div>
+                         `;
+                         document.getElementById('main-content').innerHTML = `
+                             <div class="content-container-get-ticket">
+                                 <div class="form-container-for-ticket ticket-container">
+                                     ${ticketsHTML}
+                                 </div>
+                             </div>
+                         `;
+                         document.getElementById('get-ticket-status').addEventListener('click', function () {
+                             let selectedStatus = document.getElementById('ticket-status-filter').value;
+                             let filteredTickets = data.tickets.filter(ticket => {
+                                 if (selectedStatus === 'both') return true;
+                                 return ticket.status === selectedStatus;
+                             });
+                             let ticketTableBody = document.getElementById('ticket-table-body');
+                             ticketTableBody.innerHTML = "";
+                             if (filteredTickets.length > 0) {
+                                 filteredTickets.forEach(ticket => {
+                                     let row = `
+                                         <tr>
+                                             <td>${ticket.ticket_id}</td>
+                                             <td>${ticket.status}</td>
+                                         </tr>
+                                     `;
+                                     ticketTableBody.innerHTML += row;
+                                 });
+                             } else {
+                                 ticketTableBody.innerHTML = `<tr><td colspan="2">No tickets found</td></tr>`;
+                             }
+                         });
+                     })
+                     .catch(error => console.error("Error fetching tickets:", error));
+             } 
+             else if (option === 'ticket-search') {
+                 mainContent.innerHTML = `
+                     <div class="content-container-ticket-search">
+                         <div class="form-container-for-ticket-search">
+                             <div class="support-icon">
+                                 <a href="#" onclick="loadContent('help','ticket-details-help')"><i class="fa-sharp fa-solid fa-circle-question fa-2xl" style="color: #007bff;"></i></a>
+                             </div>    
+                             <h1>Ticket Search</h1>
+                             <form id="ticketSearchForm">
+                                 <input type="text" id="ticket-number" placeholder="Enter Ticket Number">
+                                 <button onclick="searchTicket()">Search</button>
+                             </form>
+                             <div id="ticket-result"></div>
+                         </div>
+                     </div>
+                 `;
+                 document.getElementById("ticketSearchForm").onsubmit = function(event) {
+                     event.preventDefault();
+                     const ticketId = document.getElementById("ticket-number").value;
+                     fetch('/search_ticket', {
+                         method: 'POST',
+                         headers: {
+                             'Content-Type': 'application/json',
+                         },
+                         body: JSON.stringify({ ticket_id: ticketId }),
+                     })
+                     .then(response => response.json())
+                     .then(data => {
+                         const ticketResult = document.getElementById('ticket-result');
+                         ticketResult.innerHTML = "";
+                         if (data.error) {
+                             ticketResult.innerHTML = `<p style="color: red; margin-left:250px;">${data.error}</p>`;
+                             return;
+                         }
+                         let stamp = "";
+                         let leftForm = "";
+                         let rightForm = "";
+                         if (data.status === "match_found") {
+                             stamp = `<div class="stamp match-found">Match Found</div>`;
+                             leftForm = createFormContainer("Complaint Details", data.complaint_details);
+                             rightForm = createFormContainer("Founder Details", data.suspected_details);
+                         } else if (data.status === "complaint_found") {
+                             stamp = `<div class="stamp no-match">No Match Found</div>`;
+                             leftForm = createFormContainer("Complaint Details", data.complaint_details);
+                             rightForm = `<div class="form-container"><p>No matched image in <br>Suspected Details</br></p></div>`;
+                         } else if (data.status === "suspected_found") {
+                             stamp = `<div class="stamp no-match">No Match Found</div>`;
+                             leftForm = `<div class="form-container"><p>No matched image <br>Complaint Details</br></p></div>`;
+                             rightForm = createFormContainer("Founder Details", data.suspected_details);
+                         }
+                         ticketResult.innerHTML = `
+                             <div class="inner-form-container">
+                                 <div class="ticket-details">
+                                     ${stamp}
+                                     ${leftForm}
+                                     ${rightForm}
+                                 </div>
+                             </div>
+                         `;
+                     })
+                     .catch(error => {
+                         console.error("Error:", error);
+                         alert("An error occurred while searching for the ticket.");
+                     });
+                 };
+                 function createFormContainer(title, details) {
+                     if (!details) return "";
+                     const imagePath = `/${details[details.length - 1]}/${details[1]}`;
+                     let date = 8;
+                     let time = 9;
+                     
+                     // Check if date field starts with "mcr" or "scf" and adjust indices
+                     if (details[date].startsWith("MCR") || details[date].startsWith("SCF")) {
+                         date=9;
+                         time=10;
+                     }
+                     const fields = title === "Complaint Details" ? [
+                         `<strong>ID :</strong> ${details[0]}`,
+                         `<strong>Missing Person Name :</strong> ${details[3]}`,
+                         `<strong>Address :</strong> ${details[4]}`,
+                         `<strong>Phone :</strong> ${details[5]}`,
+                         `<strong>Description :</strong> ${details[6]}`,
+                         `<strong>Date :</strong> ${details[date]}`,
+                         `<strong>Time :</strong> ${details[time]}`
+                     ] : [
+                         `<strong>ID :</strong> ${details[0]}`,
+                         `<strong>Name :</strong> ${details[3]}`,
+                         `<strong>Found At :</strong> ${details[4]}`,
+                         `<strong>Phone :</strong> ${details[6]}`,
+                         `<strong>Missing Person Name :</strong> ${details[5]}`,
+                         `<strong>Date :</strong> ${details[date]}`,
+                         `<strong>Time :</strong> ${details[time]}`
+                     ];
+                     return `
+                         <div class="form-container">
+                             <h2>${title}</h2>
+                             <img src="${imagePath}" alt="${title}" class="ticket-image">
+                             <ul>
+                                 ${fields.map(field => `<li>${field}</li>`).join("")}
+                             </ul>
+                         </div>
+                     `;
+                 }
+             } 
+             else if (option === 'statistics') {
+                 mainContent.innerHTML = `
+                     <div class="content-container-statistics">
+                         <div class="form-container-for-statistics statistics-container">
+                            <div class="statistics-container">
+                             <h1>Statistics</h1>
+                             <div class="statistics-boxes">
+                                 <div class="statistics-box" id="total-btn">
+                                     <h3>Total Cases</h3>
+                                     <p id="total-cases">0</p>
+                                 </div>
+                                 <div class="statistics-box" id="mcr-btn">
+                                     <h3>MCR Cases</h3>
+                                     <p id="mcr-total">0</p>
+                                 </div>
+                                 <div class="statistics-box" id="scf-btn">
+                                     <h3>SCF Cases</h3>
+                                     <p id="scf-total">0</p>
+                                 </div>
+                                 <div class="statistics-box" id="found-btn">
+                                     <h3>Found Cases</h3>
+                                     <p id="found-cases">0</p>
+                                 </div>
+                             </div>
+ 
+                             <div class="chart-buttons">
+                                 <button id="donut-btn">Case Distribution</button>
+                                 <button id="grouped-btn">MCR Cases Vs SCF Cases </button>
+                                 <button id="pie-btn">Pending Vs Found</button>
+                             </div>
+ 
+                             <div class="graph-container" id="graph-container"></div>
+                         </div>
+ 
+                         
+                         </div>
+                     </div>
+                 `;
+                 let graphData = {};
+ 
+                 function showGraph(type) {
+                     const container = document.getElementById('graph-container');
+                     const data = graphData[type];
+ 
+                     if (!data || !data.values || data.values.length === 0) {
+                         container.innerHTML = "<h2>No Data Available</h2>";
+                         return;
+                     }
+ 
+                     let plotData = [];
+ 
+                     if (type === "grouped") {
+                         plotData = [
+                             { x: data.x, y: data.pending, type: 'bar', name: 'Pending', marker: { color: 'orange' } },
+                             { x: data.x, y: data.found, type: 'bar', name: 'Found', marker: { color: 'purple' } }
+                         ];
+                     } else {
+                         plotData = [{
+                             labels: data.labels,
+                             values: data.values,
+                             type: data.type,
+                             hole: data.hole || 0,
+                             marker: { colors: data.colors }
+                         }];
+                     }
+ 
+                     const layout = {
+                         title: data.title,
+                         showlegend: true,
+                         autosize: true,
+                         margin: { t: 100, l: 50, r: 50, b: 50 },
+                         barmode: type === "grouped" ? "group" : undefined
+                     };
+ 
+                     Plotly.newPlot(container, plotData, layout, {
+                         displaylogo: false,
+                         modeBarButtonsToAdd: ['zoomIn2d', 'zoomOut2d', 'resetScale2d', 'toImage'],
+                     });
+                 }
+ 
+                 document.getElementById("donut-btn").addEventListener("click", () => showGraph("donut"));
+                 document.getElementById("grouped-btn").addEventListener("click", () => showGraph("grouped"));
+                 document.getElementById("pie-btn").addEventListener("click", () => showGraph("pie"));
+ 
+                 fetch('/get_statistics')
+                     .then(response => response.json())
+                     .then(data => {
+                         document.getElementById('total-cases').textContent = data.total_cases;
+                         document.getElementById('mcr-total').textContent = data.mcr_total;
+                         document.getElementById('scf-total').textContent = data.scf_total;
+                         document.getElementById('found-cases').textContent = data.mcr_found + data.scf_found;
+ 
+                         graphData = {
+                             donut: {
+                                 labels: ["MCR Pending", "MCR Found", "SCF Pending", "SCF Found"],
+                                 values: [data.mcr_pending, data.mcr_found, data.scf_pending, data.scf_found],
+                                 type: 'pie',
+                                 hole: 0.4,
+                                 colors: ["Green", "indigo", "red", "gold"],
+                                 title: "Donut Chart - Case Distribution"
+                             },
+                             grouped: {
+                                 
+                                 x: ["MCR", "SCF"],
+                                 pending: [data.mcr_pending, data.scf_pending],
+                                 found: [data.mcr_found, data.scf_found],
+ 
+                                 values: [1],
+                                 type: 'bar',
+                                 title: "Grouped Bar Chart - Case Comparison"
+                             },
+                             pie: {
+                                 labels: ["Total Pending", "Total Found"],
+                                 values: [data.mcr_pending + data.scf_pending, data.mcr_found + data.scf_found],
+                                 type: 'pie',
+                                 colors: ["orange", "deep green"],
+                                 title: "Pie Chart - Pending vs Found"
+                             }
+                         };
+ 
+                         showGraph('donut'); // Default graph on load
+                     })
+                     .catch(error => console.error('Error fetching statistics:', error));  
+         //  } else if (option === 'feedback') {
+                 // mainContent.innerHTML = `
+                 //     <div class="content-container-feedback">
+                 //         <div class="form-container-for-feedback feedback-container">
+                 //             <h1>Feedback</h1>
+                 //             <ul>
+                 //                 <li>Feedback form will be displayed here.</li>
+                 //             </ul>
+                 //         </div>
+                 //     </div>
+                 // `;
+             } else if (option === 'help') {
+                 mainContent.innerHTML = `
+                     <div class="content-container-help">
+                         <div class="form-container-for-help help-container">
+                             <h1>Help</h1>
+                             <p>This project is dedicated to helping, locate missing people by raising awareness, collecting reports, and tracking progress.</p>
+                             
+                             <h2 id="raise-complaint-help">Raise Complaint:</h2>
+                             <div class="help-section">
+                                 <img src="{{ url_for('static', filename='images/example.jpg') }}" alt="Example for Raise Complaint" class="help-image">
+                                 <img src="{{ url_for('static', filename='images/error raise complaint.png') }}" alt="Example for Raise Complaint" class="help-image">
+                                 
+                                 
+                                 <ul>
+                                     <li><strong>Missing Person Name:</strong> Only alphabets and spaces allowed.</li>
+                                     <li><strong>Parent Address:</strong> Can contain alphabets, numbers, and spaces.</li>
+                                     <li><strong>Phone Number:</strong> Must be 10 digits and start with 6, 7, 8, or 9.</li>
+                                     <li><strong>Description:</strong> Can contain alphabets, numbers, and spaces.</li>
+                                 </ul>
+                                 <h2>Accepted</h2>
+                                 <img src="{{ url_for('static', filename='images/raise complaint.png') }}" alt="Example for Raise Complaint" class="help-image">
+                             </div>
+ 
+                             <h2 id="suspected-missing-help">Suspected Missing:</h2>
+                             <div class="help-section">
+                                 <img src="{{ url_for('static', filename='images/example.jpg') }}" alt="Example for Suspected Missing" class="help-image">
+                                 <img src="{{ url_for('static', filename='images/error suspected missing.png') }}" alt="Example for Suspected Missing" class="help-image">
+                                 
+                                 <ul>
+                                     <li><strong>Your Name:</strong> Only alphabets and spaces allowed.</li>
+                                     <li><strong>Location Found At:</strong> Can contain alphabets, numbers, and spaces.</li>
+                                     <li><strong>Missing Person Name:</strong> Only alphabets and spaces allowed.</li>
+                                     <li><strong>Phone Number:</strong> Must be 10 digits and start with 6, 7, 8, or 9.</li>
+                                 </ul>
+                                 <h2>Accepted</h2>
+                                 <img src="{{ url_for('static', filename='images/suspected missing.png') }}" alt="Example for Suspected Missing" class="help-image">
+                             </div>
+ 
+                             <h2 id="ticket-status-help">Ticket Status:</h2>
+                             <div class="help-section">
+                                 <img src="{{ url_for('static', filename='images/ticket status.png') }}" alt="Example for Ticket Status" class="help-image">
+                                 <p>Check your submitted cases reference_ids and their status in the ticket status section.</p>
+                             </div>
+                             <h2 id="ticket-details-help">Ticket Details:</h2>
+                             <div class="help-section">
+                                 <img src="{{ url_for('static', filename='images/ticket details.png') }}" alt="Example for Ticket Details" class="help-image">
+                                 <p>View detailed information about your submitted ticket, including its current status by entering your reference_id (MCR-XXXXXXXX / SCF-XXXXXXXX) number.</p>
+                             </div>
+ 
+                         </div>
+                     </div>
+                 `;
+                 if (section) {
+                     setTimeout(() => {
+                         const sectionElement = document.getElementById(section);
+                         if (sectionElement) {
+                             sectionElement.scrollIntoView({ behavior: 'smooth' });
+                         }
+                     }, 100);
+                 }
+             }
+ 
+         }
+         
+         window.onload = function() {
+             loadContent('home');
+         };
+         function showLogoutPopup() {
+             document.getElementById("logout-popup").classList.add("active");
+         }
+         function closeLogoutPopup() {
+             document.getElementById("logout-popup").classList.remove("active");
+         }
+         function logout() {
+             window.location.href = "{{ url_for('logout') }}";
+         }
+     </script>
+ </body>
+ </html>

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='admindashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="navbar">
+        <div class="nav-left">
+            <svg xmlns="http://www.w3.org/2000/svg" style="margin-left:15px;" height="24" width="30" viewBox="0 0 640 512">
+                <path fill="#ffffff" d="M320 0a40 40 0 1 1 0 80 40 40 0 1 1 0-80zm44.7 164.3L375.8 253c1.6 13.2-7.7 25.1-20.8 26.8s-25.1-7.7-26.8-20.8l-4.4-35-7.6 0-4.4 35c-1.6 13.2-13.6 22.5-26.8 20.8s-22.5-13.6-20.8-26.8l11.1-88.8L255.5 181c-10.1 8.6-25.3 7.3-33.8-2.8s-7.3-25.3 2.8-33.8l27.9-23.6C271.3 104.8 295.3 96 320 96s48.7 8.8 67.6 24.7l27.9 23.6c10.1 8.6 11.4 23.7 2.8 33.8s-23.7 11.4-33.8 2.8l-19.8-16.7zM40 64c22.1 0 40 17.9 40 40l0 40 0 80 0 40.2c0 17 6.7 33.3 18.7 45.3l51.1 51.1c8.3 8.3 21.3 9.6 31 3.1c12.9-8.6 14.7-26.9 3.7-37.8l-15.2-15.2-32-32c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l32 32 15.2 15.2c0 0 0 0 0 0l25.3 25.3c21 21 32.8 49.5 32.8 79.2l0 78.9c0 26.5-21.5 48-48 48l-66.7 0c-17 0-33.3-6.7-45.3-18.7L28.1 393.4C10.1 375.4 0 351 0 325.5L0 224l0-64 0-56C0 81.9 17.9 64 40 64zm560 0c22.1 0 40 17.9 40 40l0 56 0 64 0 101.5c0 25.5-10.1 49.9-28.1 67.9L512 493.3c-12 12-28.3 18.7-45.3 18.7L400 512c-26.5 0-48-21.5-48-48l0-78.9c0-29.7 11.8-58.2 32.8-79.2l25.3-25.3c0 0 0 0 0 0l15.2-15.2 32-32c12.5-12.5 32.8-12.5 45.3 0s12.5 32.8 0 45.3l-32 32-15.2 15.2c-11 11-9.2 29.2 3.7 37.8c9.7 6.5 22.7 5.2 31-3.1l51.1-51.1c12-12 18.7-28.3 18.7-45.3l0-40.2 0-80 0-40c0-22.1 17.9-40 40-40z"/>
+            </svg>
+        </div>
+        <div class="nav-center">
+            <span style="font-weight: bold;margin-left:100px;">TraceXpert: Real-Time Facial Recognition and Case Management for Missing Person Recovery</span>
+        </div>
+        <div class="nav-right">
+            <div class="icon">
+                <a href="#" onclick="loadContent('dashboard')" style="font-size: 24px; text-decoration: none; color: white;">
+                    <i class="fas fa-home"></i>
+                </a>
+            </div>
+            <div class="icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="icon" id="profileIcon">
+                <i class="fas fa-user-circle"></i>
+                <div class="dropdown" id="profileDropdown">
+                    <p><i class="fas fa-envelope"></i> {{ user['Email'] }}</p>
+                    <p><i class="fas fa-user"></i> {{ user['Name'] }}</p>
+                    <p><i class="fas fa-phone"></i> {{ user['Phone'] }}</p>
+                    <button id="logoutButton" onclick="showLogoutPopup()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <a href="#" onclick="loadContent('dashboard')">Dashboard</a>
+        <a href="#" onclick="loadContent('Found')">Found</a>
+        <a href="#" onclick="loadContent('complaints-pending')">Pending Complaints</a>
+        <a href="#" onclick="loadContent('suspected-pending')">Pending Suspected</a>
+        <a href="#" onclick="loadContent('graph')">Graphs</a>
+    </div>
+
+    <div class="main" id="main-content">
+        <!-- Default content loaded by the script -->
+    </div>
+
+    <div id="logout-popup" class="logout-popup">
+        <p>Are you sure you want to log out?</p>
+        <button class="confirm" onclick="logout()">Yes</button>
+        <button class="cancel" onclick="closeLogoutPopup()">No</button>
+    </div>
+
+    <script>
+        const profileIcon = document.getElementById("profileIcon");
+        const profileDropdown = document.getElementById("profileDropdown");
+        profileIcon.addEventListener("click", function (event) {
+                event.stopPropagation();
+                profileDropdown.style.display = profileDropdown.style.display === "block" ? "none" : "block";
+                notificationDropdown.style.display = "none";
+            });
+            document.addEventListener("click", function (event) {
+                if (!profileDropdown.contains(event.target) && !profileIcon.contains(event.target)) {
+                    profileDropdown.style.display = "none";
+                }
+            });
+        function loadContent(option) {
+            const mainContent = document.getElementById('main-content');
+            const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+            sidebarLinks.forEach(link => link.classList.remove('active'));
+            const activeLink = document.querySelector(`.sidebar a[onclick="loadContent('${option}')"]`);
+            if (activeLink) {
+                activeLink.classList.add('active');
+            }
+            if (option === 'dashboard') {
+                mainContent.innerHTML = `
+                    <div class="dash-container">
+                    <div class="c"><h1>Dashboard</h1></div>
+                    <div class="counters-container">
+                        <div class="counter-box">
+                            <h3>Total Users</h3>
+                            <p id="total-users">0</p>
+                        </div>
+                        <div class="counter-box">
+                            <h3>Total Cases</h3>
+                            <p id="total_cases">0</p>
+                        </div>
+                        <div class="counter-box">
+                            <h3>MCR Pending</h3>
+                            <p id="mcr-pending">0</p>
+                        </div>
+                        <div class="counter-box">
+                            <h3>MCR Found</h3>
+                            <p id="mcr-found">0</p>
+                        </div>
+                        <div class="counter-box">
+                            <h3>SCF Pending</h3>
+                            <p id="scf-pending">0</p>
+                        </div>
+                        <div class="counter-box">
+                            <h3>SCF Found</h3>
+                            <p id="scf-found">0</p>
+                        </div>
+                        
+                        <div class="counter-box">
+                            <h3>Total Pending</h3>
+                            <p id="total_pending">0</p>
+                        </div>
+                        <div class="counter-box">
+                            <h3>Total Found</h3>
+                            <p id="total-found">0</p>
+                        </div>
+                    </div>
+                    </div>
+                `;
+                function fetchCounts() {
+                fetch('/get_statistics')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error("Error fetching counts:", data.error);
+                            return;
+                        }
+
+                        // Animate counts
+                        animateCount("total-users", data.total_users);
+                        animateCount("mcr-pending", data.mcr_pending_admin);
+                        animateCount("mcr-found", data.mcr_found_admin);
+                        animateCount("scf-pending", data.scf_pending_admin);
+                        animateCount("scf-found", data.scf_found_admin);
+                        animateCount("total-found", data.total_found_admin);
+                        animateCount("total_cases", data.admin_total_cases);
+                        animateCount("total_pending", data.total_pending);
+                    })
+                    .catch(error => console.error("Error fetching counts:", error));
+                }
+
+                function animateCount(elementId, finalValue) {
+                    let current = 0;
+                    const element = document.getElementById(elementId);
+                    const increment = finalValue / 100; // Adjust speed of animation
+
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= finalValue) {
+                            clearInterval(timer);
+                            current = finalValue;
+                        }
+                        element.textContent = Math.floor(current);
+                    }, 25); // Adjust interval for smoother/faster animation
+                }
+
+                // Fetch counts after 5 seconds
+                setTimeout(fetchCounts, 10);
+            }
+            else if (option === 'Found') {
+                fetch('/get_found_data')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            mainContent.innerHTML = `
+                                <div class="c"><h1>Found Cases</h1></div>
+                                <div class="table-container">
+                                    <p>No records found.</p>
+                                </div>
+                            `;
+                        } else {
+                            mainContent.innerHTML = `
+                                <div class="c"><h1>Found Cases</h1></div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Complaint ID</th>
+                                                <th>Complaint Image</th>
+                                                <th>Complaint Raised By</th>
+                                                <th>Missing Person Name</th>
+                                                <th>Address</th>
+                                                <th>Phone Number</th>
+                                                <th>Date</th>
+                                                <th>Suspected ID</th>
+                                                <th>Suspected Image</th>
+                                                <th>Founder Email</th>
+                                                <th>Founder Name</th>
+                                                <th>Location Found At</th>
+                                                <th>Founder Phone</th>
+                                                <th>Found Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${data.map(row => `
+                                                <tr>
+                                                    <td>${row.complaint_id}</td>
+                                                    <td><img src="/static/found_data/${row.complaint_image}" alt="Complaint Image" class="table-image"></td>
+                                                    <td>${row.complaint_email}</td>
+                                                    <td>${row.name_of_child}</td>
+                                                    <td>${row.address}</td>
+                                                    <td>${row.phone}</td>
+                                                    <td>${row.date}</td>
+                                                    <td>${row.suspected_id}</td>
+                                                    <td><img src="/static/found_data/${row.suspected_image}" alt="Suspected Image" class="table-image"></td>
+                                                    <td>${row.founder_email}</td>
+                                                    <td>${row.founder_name}</td>
+                                                    <td>${row.location_found}</td>
+                                                    <td>${row.founder_phone}</td>
+                                                    <td>${row.found_date}</td>
+                                                    <td>${row.status}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => console.error("Error fetching found data:", error));
+            } else if (option === 'complaints-pending') {
+                fetch('/get_complaints_pending')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            mainContent.innerHTML = `
+                                <div class="c"><h1>Pending Complaints</h1></div>
+                                <div class="table-container">
+                                    <p>No records found.</p>
+                                </div>
+                            `;
+                        } else {
+                            mainContent.innerHTML = `
+                                <div class="c"><h1>Pending Complaints</h1></div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Complaint ID</th>
+                                                <th>Image</th>
+                                                <th>Email</th>
+                                                <th>Missing Person Name</th>
+                                                <th>Address</th>
+                                                <th>Phone Number</th>
+                                                <th>Description</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${data.map(row => `
+                                                <tr>
+                                                    <td>${row.complaint_id}</td>
+                                                    <td><img src="/static/complaint_data/${row.image}" alt="Complaint Image" class="table-image"></td>
+                                                    <td>${row.email}</td>
+                                                    <td>${row.name_of_child}</td>
+                                                    <td>${row.address}</td>
+                                                    <td>${row.phone}</td>
+                                                    <td>${row.description}</td>
+                                                    <td>${row.date}</td>
+                                                    <td>${row.status}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => console.error("Error fetching pending complaints:", error));
+            } else if (option === 'suspected-pending') {
+                fetch('/get_suspected_pending')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            mainContent.innerHTML = `
+                                <div class="c"><h1>Pending Suspected</h1></div>
+                                <div class="table-container">
+                                    <p>No records found.</p>
+                                </div>
+                            `;
+                        } else {
+                            mainContent.innerHTML = `
+                                <div class="c"><h1>Pending Suspected</h1></div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Suspected ID</th>
+                                                <th>Image</th>
+                                                <th>Email</th>
+                                                <th>Founder Name</th>
+                                                <th>Location Found At</th>
+                                                <th>Missing Person Name</th>
+                                                <th>Phone Number</th>
+                                                <th>Found Date</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${data.map(row => `
+                                                <tr>
+                                                    <td>${row.suspected_id}</td>
+                                                    <td><img src="/static/suspected_data/${row.image}" alt="Suspected Image" class="table-image"></td>
+                                                    <td>${row.email}</td>
+                                                    <td>${row.founder_name}</td>
+                                                    <td>${row.location_found}</td>
+                                                    <td>${row.name_of_child}</td>
+                                                    <td>${row.phone}</td>
+                                                    <td>${row.found_date}</td>
+                                                    <td>${row.status}</td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => console.error("Error fetching pending suspected:", error));
+            }
+            else if (option === 'graph') {
+                mainContent.innerHTML = `
+                    <div class="dash-container">
+                        <div class="c"><h1>Graph Dashboard</h1></div>
+                        <div class="chart-buttons admin-bts">
+                            <button onclick="showGraph('area')">Tickets Over Time</button>
+                            <button onclick="showGraph('donut')">Case Distribution</button>
+                            <button onclick="showGraph('stacked_bar')">MCR & SCF Per Day</button>
+                            <button onclick="showGraph('pie')">Pending vs Found</button>
+                            <button onclick="showGraph('pending_found_bar')">Total MCR & SCF Cases</button>
+                            <button onclick="showGraph('heatmap')">Traffic Per Hour</button>
+                            <button onclick="showGraph('scatter')">Case Resolution Time</button>
+                        </div>
+                        </div>
+                        <div id="graph"></div>
+                    </div>
+                `;
+
+                // Fetch all graph data when the page loads
+                fetch('/get_all_graphs')
+                    .then(response => response.json())
+                    .then(data => {
+                        graphData = data;
+                        showGraph('area');  // Load initial graph
+                    })
+                    .catch(error => console.error("Error fetching graph data:", error));
+            }
+        }
+
+        function showLogoutPopup() {
+            document.getElementById("logout-popup").classList.add("active");
+        }
+
+        function closeLogoutPopup() {
+            document.getElementById("logout-popup").classList.remove("active");
+        }
+
+        function logout() {
+            window.location.href = "{{ url_for('logout') }}";  // Redirect to logout
+        }
+
+        window.onload = function() {
+            loadContent('dashboard');
+        };
+
+        let graphData = {};  // Global variable to store graph data
+
+        function showGraph(graphType) {
+            const graphDiv = document.getElementById('graph');
+            if (!graphDiv) {
+                console.error("Graph container not found");
+                return;
+            }
+            graphDiv.innerHTML = '';  // Clear previous graph
+
+            if (!graphData[graphType]) {
+                console.error(`No data available for ${graphType}`);
+                return;
+            }
+
+            if (graphType === "donut" || graphType === "pie") {
+                let chartData = graphData[graphType];
+
+                if (!chartData || !chartData.values || !chartData.names) {
+                    console.error("Invalid pie chart data:", chartData);
+                    return;
+                }
+                    Plotly.newPlot(graphDiv, [{
+                        values: chartData.values,
+                        labels: chartData.names,
+                        hole: graphType === "donut" ? 0.5 : 0,
+                        type: 'pie'
+                    }], { title: graphType === "pie" ? "Pending vs. Found Cases" : " Case Distribution" });
+            }
+            else if (graphType === "pending_found_bar") {
+                const graphDiv = document.getElementById("graph");
+
+                if (!graphDiv) {
+                    console.error("Graph container not found");
+                    return;
+                }
+
+                graphDiv.innerHTML = ''; // Clear previous graph
+
+                if (!graphData || !graphData.pending_found_bar) {
+                    console.error("No data available for pending vs found bar chart");
+                    graphDiv.innerHTML = "<p style='color: red;'>No data available for this chart</p>";
+                    return;
+                }
+
+                let barData = graphData.pending_found_bar;
+
+                if (!barData.categories || !barData.values) {
+                    console.error("Invalid bar chart data:", barData);
+                    graphDiv.innerHTML = "<p style='color: red;'>Invalid data for this chart</p>";
+                    return;
+                }
+
+                let trace = {
+                    x: barData.categories,
+                    y: barData.values,
+                    type: "bar",
+                    marker: { color: ["blue", "green", "purple", "orange", "red", "teal"] } // Different colors for each category
+                };
+
+                Plotly.newPlot(graphDiv, [trace], {
+                    title: "Pending vs. Found Cases (Including Totals)",
+                    xaxis: { title: "Case Type" },
+                    yaxis: { title: "Number of Cases" }
+                });
+            }
+            else if (graphType === "stacked_bar") {
+                let chartData = graphData.stacked_bar;
+
+                if (!chartData || !chartData.dates || !chartData.counts || !chartData.statuses || !chartData.types) {
+                    console.error("Invalid stacked bar data:", chartData);
+                    return;
+                }
+
+                let traces = [];
+                let uniqueStatuses = [...new Set(chartData.statuses)];
+                let uniqueTypes = [...new Set(chartData.types)];
+
+                uniqueTypes.forEach(type => {
+                    uniqueStatuses.forEach(status => {
+                        let filteredData = chartData.dates
+                            .map((date, index) => ({
+                                x: date,
+                                y: chartData.counts[index],
+                                status: chartData.statuses[index],
+                                type: chartData.types[index],
+                            }))
+                            .filter(d => d.type === type && d.status === status);
+
+                        traces.push({
+                            x: filteredData.map(d => d.x),
+                            y: filteredData.map(d => d.y),
+                            name: `${type} - ${status}`,
+                            type: 'bar'
+                        });
+                    });
+                });
+
+                Plotly.newPlot(graphDiv, traces, {
+                    title: "MCR and SCF Tickets by Status Over Time",
+                    barmode: "stack"
+                });
+            }
+            else if (graphType === "heatmap") {
+                let heatmapData = graphData.heatmap;
+
+                if (!heatmapData || !heatmapData.x_labels || !heatmapData.y_labels || !heatmapData.z_values) {
+                    console.error("Invalid heatmap data:", heatmapData);
+                    return;
+                }
+
+                let trace = {
+                    x: heatmapData.x_labels,  // Time labels ("00:00", "00:30", ..., "23:30")
+                    y: heatmapData.y_labels,  // ["Ticket Volume"]
+                    z: heatmapData.z_values,  // Nested list of ticket counts
+                    type: "heatmap",
+                    colorscale: [
+                        [0, "black"],  // 0 tickets → Black
+                        [0.2, "blue"],  // Low traffic → Blue
+                        [0.4, "green"],  // Medium traffic → Green
+                        [0.6, "yellow"],  // High traffic → Yellow
+                        [0.8, "orange"],  // Very high → Orange
+                        [1, "red"]  // Peak hours → Red
+                    ],
+                    hoverongaps: false
+                };
+
+                let layout = {
+                    title: "Peak Ticket Traffic (30-Minute Intervals)",
+                    xaxis: { title: "Time of the Day", tickangle: -45 },
+                    yaxis: { title: "", tickvals: [0], ticktext: heatmapData.y_labels }, // Single row
+                    margin: { l: 50, r: 20, t: 50, b: 80 }
+                };
+
+                Plotly.newPlot(graphDiv, [trace], layout);
+            }
+
+            else if (graphType === "scatter") {
+                let chartData = graphData.scatter;
+
+                if (!chartData || !chartData.latest_ids || !chartData.earliest_ids) {
+                    console.error("Invalid scatter plot data:", chartData);
+                    return;
+                }
+
+                // Swap X and Y axes
+                let latest_trace = {
+                    x: chartData.latest_times, // Swapped: X-axis now represents time
+                    y: chartData.latest_dates, // Swapped: Y-axis now represents date
+                    mode: "markers",
+                    marker: { color: "green", size: 10 },
+                    type: "scatter",
+                    name: "Latest Tickets",
+                    customdata: chartData.latest_ids.map((id, i) => ({
+                        latest_id: id,
+                        earliest_id: chartData.earliest_ids[i],
+                        time_diff: chartData.time_diffs[i]
+                    })),
+                    hovertemplate: "%{customdata.latest_id}" // Show only Ticket ID
+                };
+
+                let earliest_trace = {
+                    x: chartData.earliest_times, // Swapped: X-axis now represents time
+                    y: chartData.earliest_dates, // Swapped: Y-axis now represents date
+                    mode: "markers",
+                    marker: { color: "red", size: 10 },
+                    type: "scatter",
+                    name: "Earliest Tickets",
+                    customdata: chartData.earliest_ids,
+                    hovertemplate: "%{customdata}" // Show only Ticket ID
+                };
+
+                let traces = [latest_trace, earliest_trace];
+
+                let layout = {
+                    title: "Case Resolution Time Analysis",
+                    xaxis: { title: "Time (24-hour format)" }, // Adjusted axis labels
+                    yaxis: { title: "Date" },
+                    hovermode: "closest",
+                    showlegend: false
+                };
+
+                Plotly.newPlot(graphDiv, traces, layout).then((graph) => {
+                    let currentLine = null; // To track the drawn line
+
+                    graphDiv.on("plotly_hover", function (data) {
+                        let pointIndex = data.points[0].pointIndex;
+                        let traceName = data.points[0].data.name;
+
+                        // Find the linked index
+                        let linkedIndex = traceName === "Latest Tickets"
+                            ? pointIndex
+                            : chartData.earliest_ids.indexOf(chartData.latest_ids[pointIndex]);
+
+                        if (linkedIndex === -1) return; // No linked ticket found
+
+                        // Draw a line from red to green (Swapped X and Y)
+                        let line_trace = {
+                            x: [chartData.earliest_times[linkedIndex], chartData.latest_times[linkedIndex]], // Swapped X
+                            y: [chartData.earliest_dates[linkedIndex], chartData.latest_dates[linkedIndex]], // Swapped Y
+                            mode: "lines",
+                            line: { color: "black", width: 2 },
+                            showlegend: false
+                        };
+
+                        // Update hover text to show both IDs and resolution time
+                        let hoverText = `Ticket ID: ${chartData.latest_ids[linkedIndex]}<br>
+                                        Linked ID: ${chartData.earliest_ids[linkedIndex]}<br>
+                                        Time to Solve: ${chartData.time_diffs[linkedIndex]}`;
+
+                        Plotly.restyle(graphDiv, { hovertemplate: hoverText }, [traceName === "Latest Tickets" ? 0 : 1]);
+                        currentLine = Plotly.addTraces(graphDiv, line_trace);
+                    });
+
+                    graphDiv.on("plotly_unhover", function () {
+                        if (currentLine !== null) {
+                            Plotly.deleteTraces(graphDiv, 2); // Remove line on unhover
+                            currentLine = null;
+                        }
+                    });
+                });
+            }
+
+            else if (graphType === "area") {
+                let chartData = graphData.area;
+
+                if (!chartData || !chartData.dates || !chartData.counts) {
+                    console.error("Invalid area chart data:", chartData);
+                    return;
+                }
+
+                let trace = {
+                    x: chartData.dates,
+                    y: chartData.counts,
+                    type: 'scatter',
+                    fill: 'tozeroy',
+                    line: { color: 'blue' }
+                };
+
+                Plotly.newPlot(graphDiv, [trace], {
+                    title: " Tickets Over Time",
+                    xaxis: { title: "Date" },
+                    yaxis: { title: "Total Tickets" }
+                });
+            }
+        }
+
+
+    </script>
+</body>
+</html>

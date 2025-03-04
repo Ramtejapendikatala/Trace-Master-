@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    <title>Login</title>
+</head>
+<body>
+    <a href="{{ url_for('landing') }}" class="back-arrow">
+        <i class='bx bx-arrow-back'></i>
+    </a>
+    <div class="container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <h1>Hello, Welcome!</h1>
+            <p>Don't have an account?</p>
+            <button id="register-btn">Register</button>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <h2>Login</h2>
+            <form method="POST">
+                <div class ="input-box"><input type="email" name="email" placeholder="Enter your email" required><i class='bx bxs-user '></i></div>
+                <div class ="input-box"><input type="password" name="password" placeholder="Enter your Password" required><i class='bx bxs-lock-alt'></i></div>
+                <button type="submit">Login</button>
+            </form>
+            
+            
+            {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <div>
+                    {% for category, message in messages %}
+                        {% if category == 'success' %}
+                            <p class="success-message">{{ message }}</p>
+                        {% elif category == 'error' %}
+                            <p class="error-message">{{ message }}</p>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const registerButton = document.getElementById("register-btn");
+            const loginButton = document.getElementById("login-btn");
+            const container = document.querySelector(".container");
+    
+            if (registerButton) {
+                registerButton.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    container.classList.add("move-left");
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('register') }}";
+                    }, 700);
+                });
+            }
+    
+            if (loginButton) {
+                loginButton.addEventListener("click", function(event) {
+                    event.preventDefault();
+                    container.classList.add("move-right");
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('login') }}";
+                    }, 700);
+                });
+            }
+        });
+    </script>
+    
+    
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form method="POST">
+        <input type="email" name="email" placeholder="Enter your email" required>
+        <input type="password" name="password" placeholder="Enter your password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    {% endwith %}
+</body>
+</html> -->
