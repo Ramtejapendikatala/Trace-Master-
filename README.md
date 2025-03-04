@@ -1,11 +1,10 @@
-# Trace-Master-
+# Trace-Master
 Real-Time Facial Recognition and Case Management for Missing Person Recovery.
 
 My project is developed by using AI,ML,DL tools to search missing people, Ticket tracking system , user friendly usage with guidelines and notification based on tickets.
 
 
-For Demo working of project refer - Demo.pptx
-
+Demo working of project refer - Demo.pptx
 Requirements
 Programming Language - Python
 Frontend - HTML,CSS,JavaScript
@@ -14,5 +13,9 @@ Hardware and software configurations – Processor : i5/intel or equivalent,RAM 
 Storage - CSV Files - login,register,complaint,found,suspected,otpverification
 Frameworks - Tensorflow/Keras,Numpy,Pandas,Scikit-learn,Opencv,scipy
 Models - Arch-Face,Insight Face , Mediapipe
+
+Main project file - app.py
+Static folder - CSS files, Images
+Template folder - Html files
 
 Refer requirement.txt for exact versions.
